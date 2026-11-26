@@ -1,0 +1,60 @@
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+    init: true
+    stop_grace_period: 35s
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ORIGIN: ${ORIGIN:-http://localhost:3000}
+      ADDRESS_HEADER: ${ADDRESS_HEADER:-}
+      XFF_DEPTH: ${XFF_DEPTH:-1}
+      APP_SECRET: ${APP_SECRET:?Defina APP_SECRET}
+      ADMIN_SETUP_TOKEN: ${ADMIN_SETUP_TOKEN:-}
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: macaquismo
+      PGDATABASE: macaquismo
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD}
+      BODY_SIZE_LIMIT: 32768
+    expose:
+      - "3000"
+    networks:
+      - default
+      - database
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: macaquismo
+      POSTGRES_USER: macaquismo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+      start_period: 10s
+    stop_grace_period: 30s
+
+networks:
+  database:
+    internal: true
+
+volumes:
+  postgres-data:

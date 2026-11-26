@@ -1,0 +1,12 @@
+.git
+node_modules
+.svelte-kit
+build
+.env
+.env.*
+tests
+test-results
+playwright-report
+README.md
+compose*.yaml
+Dockerfile

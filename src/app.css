@@ -1,0 +1,223 @@
+:root {
+  color-scheme: dark;
+  font-family: 'DM Sans Variable', system-ui, sans-serif;
+  font-synthesis: none;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --forest: #0a1b15;
+  --dark-panel: #112a20;
+  --gold: #dab67b;
+  --gold-deep: #a97f40;
+  --cream: #f6ebd5;
+  --on-paper: #18281f;
+  --muted: #b8bea9;
+  --line: #d6b77d35;
+  --paper-line: #785a333d;
+  --error: #f5b3a5;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { background: var(--forest); }
+
+body {
+  margin: 0;
+  min-width: 18rem;
+  min-height: 100svh;
+  color: var(--cream);
+  background:
+    radial-gradient(ellipse at 38% 18%, #38522b26, transparent 60%),
+    var(--forest) url('/artes/fundo-floresta.webp') center top / cover fixed;
+  line-height: 1.5;
+}
+
+button, input, textarea, select { font: inherit; }
+button, select, input[type='checkbox'] { cursor: pointer; }
+button:disabled, input:disabled { cursor: not-allowed; }
+a { color: inherit; text-underline-offset: 0.24em; }
+a:hover { text-decoration-thickness: 2px; }
+img { max-width: 100%; }
+p, h1, h2, h3, dl, dd { margin: 0; }
+h1, h2 { font-family: var(--serif); font-weight: 400; line-height: 1; }
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 10;
+  left: 1rem;
+  top: 1rem;
+  padding: 0.7rem 1rem;
+  color: var(--forest);
+  background: var(--cream);
+  transform: translateY(-180%);
+}
+.skip-link:focus { transform: none; }
+
+.site-header { border-bottom: 1px solid var(--line); }
+
+.site-header-inner {
+  width: min(100% - 3rem, 74rem);
+  margin: auto;
+  min-height: 4.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  font: 1.6rem/1 var(--serif);
+  white-space: nowrap;
+}
+
+.brand img { display: block; }
+.brand em { color: var(--gold); }
+
+.header-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--cream);
+  min-height: 2.75rem;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: 2rem;
+  padding-inline: 0.78rem;
+}
+
+.header-link:hover { border-color: var(--gold); }
+.header-link svg { color: var(--gold); }
+
+.button {
+  border: 1px solid transparent;
+  padding: 0.68rem 1rem;
+  min-height: 2.75rem;
+  min-width: 0;
+  border-radius: 0.55rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.52rem;
+  color: var(--forest);
+  background: var(--gold);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-decoration: none;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.button:not(:disabled):hover { background: #e9c895; }
+.button:disabled { opacity: 0.64; }
+.button svg { flex: 0 0 auto; }
+
+.button-outline {
+  background: transparent;
+  border-color: var(--line);
+  color: inherit;
+}
+
+.button-outline:not(:disabled):hover {
+  background: #d6b77d1b;
+  border-color: var(--gold);
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  color: inherit;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.field input, .field textarea, .field select, .copy-code input {
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  min-height: 2.75rem;
+  width: 100%;
+  min-width: 0;
+  background: #091911b5;
+  color: var(--cream);
+  padding: 0.6rem 0.73rem;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.field textarea { resize: vertical; }
+.field select { text-overflow: ellipsis; }
+.field input::placeholder, .field textarea::placeholder { color: var(--muted); }
+.field input:disabled { opacity: 0.7; }
+
+.check-field {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+}
+
+.check-field input {
+  flex: 0 0 auto;
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--gold);
+}
+
+.feedback { color: var(--gold); font-size: 0.9rem; }
+.feedback-error { color: var(--error); }
+
+.paper {
+  color-scheme: light;
+  color: var(--on-paper);
+  background: #f7edd9;
+  background-image: linear-gradient(135deg, #fbf2e2, #f1e3c9);
+  border: 1px solid #fdf1da;
+  border-radius: 1.05rem;
+  box-shadow: 0 1.6rem 4.5rem #01100966;
+}
+
+.paper .field input {
+  background: #fff8eb;
+  border-color: #8066496b;
+  color: var(--on-paper);
+}
+
+.paper .field input::placeholder { color: #75644c; }
+.paper :focus-visible { outline-color: #276549; }
+.paper .feedback-error { color: #862818; }
+
+.paper .button {
+  color: #fff6e4;
+  background: #173d2c;
+}
+
+.paper .button:not(:disabled):hover { background: #24523d; }
+
+@media (max-width: 36rem) {
+  .site-header-inner { width: min(100% - 2rem, 74rem); min-height: 3.9rem; }
+  .brand { font-size: 1.33rem; gap: 0.38rem; }
+  .brand img { width: 2rem; height: 2rem; }
+  .header-link { font-size: 0.8rem; }
+}
+
+@media (max-width: 23rem) {
+  .site-header-inner { gap: 0.2rem 0.4rem; }
+  .brand { font-size: 1.18rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
