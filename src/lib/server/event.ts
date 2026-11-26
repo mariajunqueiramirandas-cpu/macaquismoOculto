@@ -4,7 +4,7 @@ import { portraitCount } from '#lib/portraits.ts';
 import type { EventState, Exchange } from '#lib/event.ts';
 import { db, transaction } from './db';
 import { drawPairs, type Exclusion } from './draw';
-import { digest, formatRevealCode, newRevealCode } from './security';
+import { digest, newRevealCode } from './security';
 
 type Event = Exchange & { state: EventState };
 type Participant = { id: string; name: string; avatar: number };
@@ -152,11 +152,21 @@ export async function issueCode(id: string, version: number) {
       throw new EventError('O código já mudou. Atualize o painel antes de emitir outro.');
     }
 
-    const code = newRevealCode();
-    await client.query(`
-      UPDATE assignment SET code_digest = $2, code_version = code_version + 1 WHERE giver_id = $1
-    `, [id, digest('reveal', code)]);
-    return { name: rows[0].name, code: formatRevealCode(code) };
+    for (let attempt = 0; attempt < 32; attempt++) {
+      const code = newRevealCode();
+      const codeDigest = digest('reveal', code);
+      const claimed = await client.query(`
+        INSERT INTO issued_reveal_code (digest) VALUES ($1) ON CONFLICT DO NOTHING
+      `, [codeDigest]);
+      if (!claimed.rowCount) continue;
+
+      await client.query(`
+        UPDATE assignment SET code_digest = $2, code_version = code_version + 1 WHERE giver_id = $1
+      `, [id, codeDigest]);
+      return { name: rows[0].name, code };
+    }
+
+    throw new EventError('Não foi possível emitir um código agora. Tente novamente.');
   });
 }
 

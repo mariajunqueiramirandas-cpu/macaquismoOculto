@@ -2,6 +2,7 @@ import { createHmac, randomBytes, randomInt, scrypt, timingSafeEqual } from 'nod
 import { promisify } from 'node:util';
 import { env } from 'node:process';
 import type { RequestEvent } from '@sveltejs/kit';
+import { revealCodeAlphabet, revealCodeLength } from '#lib/reveal-code.ts';
 import { db } from './db';
 
 const derive = promisify(scrypt) as (
@@ -11,7 +12,6 @@ const derive = promisify(scrypt) as (
   options: { N: number; r: number; p: number; maxmem: number }
 ) => Promise<Buffer>;
 const scryptOptions = { N: 32_768, r: 8, p: 2, maxmem: 64 * 1024 * 1024 };
-const codeAlphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 
 export function digest(scope: string, secret: string): string {
   const key = env.APP_SECRET;
@@ -24,18 +24,7 @@ export function generateToken(): string {
 }
 
 export function newRevealCode(): string {
-  return Array.from({ length: 12 }, () => codeAlphabet[randomInt(codeAlphabet.length)]).join('');
-}
-
-export function normalizeRevealCode(value: string): string | null {
-  const code = value.toUpperCase().replace(/[\s-]/g, '');
-  return code.length === 12 && [...code].every((character) => codeAlphabet.includes(character))
-    ? code
-    : null;
-}
-
-export function formatRevealCode(code: string): string {
-  return [code.slice(0, 4), code.slice(4, 8), code.slice(8)].join('-');
+  return Array.from({ length: revealCodeLength }, () => revealCodeAlphabet[randomInt(revealCodeAlphabet.length)]).join('');
 }
 
 export function isSetupToken(value: string): boolean {
@@ -64,16 +53,18 @@ export async function verifyPassword(password: string, stored?: string): Promise
 let pruneAfter = 0;
 
 export async function withinRateLimit(
-  event: RequestEvent,
+  event: RequestEvent | null,
   scope: string,
   limit: number,
   windowSeconds: number
 ): Promise<boolean> {
-  let address = 'proxy';
-  try {
-    address = event.getClientAddress();
-  } catch {
-    // Ainda há limite compartilhado se o proxy não informar o endereço.
+  let address = 'shared';
+  if (event) {
+    try {
+      address = event.getClientAddress();
+    } catch {
+      address = 'proxy';
+    }
   }
 
   if (Date.now() >= pruneAfter) {

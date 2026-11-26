@@ -8,7 +8,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   if (isAdmin || event.url.pathname === '/') {
     event.setHeaders({
       'cache-control': 'private, no-store',
-      'referrer-policy': 'no-referrer',
+      'referrer-policy': 'same-origin',
       'x-content-type-options': 'nosniff',
       'x-robots-tag': 'noindex, nofollow'
     });

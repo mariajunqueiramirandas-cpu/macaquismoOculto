@@ -42,7 +42,7 @@ docker compose exec -T db pg_dump -U macaquismo -d macaquismo -Fc > macaquismo.d
 1. Em **Participantes**, cole um nome por linha. As artes são distribuídas aleatoriamente, com uma por pessoa enquanto houver retratos disponíveis.
 2. Em **Bloqueios**, selecione quem dá o presente e quem essa pessoa quer evitar. Marque **Bloquear nos dois sentidos** para aplicar a regra inversa também.
 3. Faça o sorteio. Se as opções não formarem uma combinação completa, o painel indica quais participantes revisar.
-4. Emita um código por participante e envie cada um no privado pelo WhatsApp. Use **WhatsApp** para abrir uma mensagem com o código e o link da revelação ou **Copiar** para copiar só o código. **Trocar código** invalida o anterior e preserva o resultado. Quem distribui os códigos também tem acesso a eles.
+4. Emita um código de quatro caracteres por participante e envie cada um no privado pelo WhatsApp. Use **WhatsApp** para abrir uma mensagem com o link que já preenche o código ou **Copiar** para copiar só o código. **Trocar código** invalida o anterior e preserva o resultado. Quem distribui os códigos também tem acesso a eles.
 5. Libere a revelação. O painel acompanha quem abriu o envelope. Ao encerrar, a consulta fica indisponível. O responsável pode reabrir a rodada e cancelar os códigos do sorteio anterior.
 6. Em **Admins**, o responsável gera convites de uso único, válidos por 48 horas. Envie o código e o link de `/admin/ativar` à pessoa convidada. Revogar uma conta encerra suas sessões.
 

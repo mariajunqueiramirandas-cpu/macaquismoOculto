@@ -1,23 +1,55 @@
 <script lang="ts">
   import { enhance, type SubmitFunction } from '$app/forms';
+  import { replaceState } from '$app/navigation';
+  import { page } from '$app/state';
   import { ArrowLeft, CalendarDays, Gift, LockKeyhole, MapPin, Timer } from '@lucide/svelte';
-  import { tick } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { budgetLabel, dateLabel } from '#lib/event.ts';
   import MonkeyPortrait from '#lib/components/MonkeyPortrait.svelte';
+  import RevealCodeInput from '#lib/components/RevealCodeInput.svelte';
+  import { normalizeRevealCode, revealCodeFragmentKey } from '#lib/reveal-code.ts';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
   let sending = $state(false);
+  let code = $state('');
+  let showingSharedCode = $state(false);
   let resultHeading = $state<HTMLElement>();
   const isOpen = $derived(data.state === 'published');
+  const revealed = $derived(showingSharedCode ? undefined : form?.result);
+  const message = $derived(showingSharedCode ? undefined : form?.message);
+
+  onMount(() => {
+    function prefillFromLink() {
+      const parameters = new URLSearchParams(window.location.hash.slice(1));
+      const sharedCode = parameters.get(revealCodeFragmentKey);
+      if (sharedCode === null) return;
+
+      code = normalizeRevealCode(sharedCode) ?? '';
+      showingSharedCode = true;
+    }
+
+    if (!form?.result) prefillFromLink();
+    window.addEventListener('hashchange', prefillFromLink);
+    return () => window.removeEventListener('hashchange', prefillFromLink);
+  });
 
   const submit: SubmitFunction = ({ cancel }) => {
     if (sending) return cancel();
     sending = true;
+    const submittedFragment = window.location.hash;
     return async ({ result, update }) => {
       try {
         await update();
+        if (window.location.hash !== submittedFragment) return;
+        showingSharedCode = false;
+
         if (result.type === 'success') {
+          const url = new URL(window.location.href);
+          if (new URLSearchParams(url.hash.slice(1)).has(revealCodeFragmentKey)) {
+            url.hash = '';
+            replaceState(url, page.state);
+          }
           await tick();
           resultHeading?.focus({ preventScroll: true });
           window.scrollTo(0, 0);
@@ -35,8 +67,8 @@
 </svelte:head>
 
 <main id="conteudo">
-  {#if form?.result}
-    {@const result = form.result}
+  {#if revealed}
+    {@const result = revealed}
     <section class="reveal" aria-label="Resultado do amigo secreto">
       <article class="paper letter">
         <div class="result-portrait"><MonkeyPortrait avatar={result.avatar} /></div>
@@ -87,24 +119,11 @@
               <label for="code">Seu código</label>
               <span id="code-hint">Enviado pelo WhatsApp</span>
             </div>
-            <input
-              name="code"
-              id="code"
-              placeholder="XXXX-XXXX-XXXX"
-              class="code-input"
-              spellcheck="false"
-              autocomplete="off"
-              autocapitalize="characters"
-              maxlength="24"
-              aria-invalid={form?.message ? 'true' : undefined}
-              aria-describedby={form?.message ? 'code-hint code-error' : 'code-hint'}
-              disabled={!isOpen}
-              required
-            />
+            <RevealCodeInput bind:value={code} disabled={!isOpen} invalid={Boolean(message)} />
           </div>
 
-          {#if form?.message}
-            <p class="feedback feedback-error" id="code-error" role="alert">{form.message}</p>
+          {#if message}
+            <p class="feedback feedback-error" id="code-error" role="alert">{message}</p>
           {/if}
 
           <button class="button" disabled={sending || !isOpen}>
@@ -190,21 +209,6 @@
   .code-label label { font-weight: 700; }
   .code-label span { color: #605946; }
 
-  .code-input {
-    min-height: 3.25rem;
-    width: 100%;
-    border: 1px solid #8066496b;
-    border-radius: 0.55rem;
-    padding: 0.7rem 0.82rem;
-    background: #fff9ed;
-    color: var(--on-paper);
-    font: 1rem/1.25 ui-monospace, monospace;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-  }
-
-  .code-input::placeholder { color: #74644e; }
-  .code-input:disabled { background: #f5ebd9; }
   .reveal-panel .button { min-height: 3.25rem; font-size: 0.94rem; }
 
   .availability {

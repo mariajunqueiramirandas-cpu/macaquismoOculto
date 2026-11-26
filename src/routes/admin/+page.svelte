@@ -5,6 +5,7 @@
   import CopyCode from '#lib/components/CopyCode.svelte';
   import MonkeyPortrait from '#lib/components/MonkeyPortrait.svelte';
   import { stateLabels } from '#lib/event.ts';
+  import { revealCodeFragmentKey } from '#lib/reveal-code.ts';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
@@ -13,6 +14,12 @@
   const canIssueCode = $derived(data.event.state === 'drawn' || data.event.state === 'published');
   const namesById = $derived(new Map(data.participants.map(({ id, name }) => [id, name])));
   const revealedCount = $derived(data.participants.filter(({ revealed }) => revealed).length);
+
+  function revealMessage(code: string): string {
+    const link = new URL('/', page.url.origin);
+    link.hash = new URLSearchParams({ [revealCodeFragmentKey]: code }).toString();
+    return `Macaquismo Oculto\n\nSeu código é ${code}. Abra seu envelope pelo link\n${link.href}`;
+  }
 </script>
 
 <svelte:head><title>Painel da rodada · Macaquismo Oculto</title></svelte:head>
@@ -160,9 +167,7 @@
                 <CopyCode
                   code={form.code}
                   label={participant.name}
-                  whatsappMessage={`Macaquismo Oculto
-
-Seu código é ${form.code}. Abra seu envelope em ${page.url.origin}/`}
+                  whatsappMessage={revealMessage(form.code)}
                 />
                 <p class="muted">{form.message}</p>
               </div>
